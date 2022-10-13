@@ -33,10 +33,10 @@ inToken = ("empty", "empty")
 # Mytokens=[("id","mynum"),("op","="),("float","3.4"),("op","+"),("int","7"),("op","*"),("float","2.1"),("sep",";")]
 
 # myvar=2*3.3+4*5.5
-Mytokens=[("id","myvar"),("op","="),("int","2"),("op","*"),("float","3.3"),("op","+"),("int","4"),("op","*"),("float","5.5"),("sep",";")]
+#Mytokens=[("id","myvar"),("op","="),("int","2"),("op","*"),("float","3.3"),("op","+"),("int","4"),("op","*"),("float","5.5"),("sep",";")]
 
 # myvar=2.4+5*6.1+3.5
-#Mytokens = [("keyword", "float"), ("id", "myvar"), ("op", "="), ("float", "2.4"), ("op", "+"), ("int", "5"), ("op", "*"), ("float", "6.1"), ("op", "+"), ("float", "3.5"), ("sep", ";")]
+Mytokens = [("keyword", "float"), ("id", "myvar"), ("op", "="), ("float", "2.4"), ("op", "+"), ("int", "5"), ("op", "*"), ("float", "6.1"), ("op", "+"), ("float", "3.5"), ("sep", ";")]
 
 
 def accept_token():
@@ -92,16 +92,31 @@ def math():
 
 
 def exp():
-    #print("\n---keyword node:")
+    #print("\n---keyword node:")  #must be after paerant
+    #global inToken;
+    #typeK, token = inToken;
+    #if (typeK == "keyword"):
+    #    print("keyword node (root): keyword")
+    #    print("   keyword has root node (token):" + token)
+    #    accept_token()
     print("\n----parent node exp, finding children nodes:")
     global inToken;
+    typeK, token = inToken;
+    if (typeK == "keyword"):
+        print("keyword node (root): keyword")
+        print("   keyword has root node (token):" + token)
+        accept_token()
+    else:
+        print("expexted keyword as the first element of the expression!\n")
+        return
+    #global inToken;
     typeT, token = inToken;
     if (typeT == "id"):
         print("child node (internal): identifier")
         print("   identifier has child node (token):" + token)
         accept_token()
     else:
-        print("expect identifier as the first element of the expression!\n")
+        print("expect identifier as the second element of the expression!\n")
         return
 
     if (inToken[1] == "="):
@@ -125,5 +140,4 @@ def main():
 
 
 main()
-
 
