@@ -1,6 +1,7 @@
 from tkinter import *
 import re
 
+
 class MyGUI:
 
     def __init__(self, root):
@@ -25,7 +26,7 @@ class MyGUI:
         self.bigtext_result = Text(self.master, height=15, width=40)
         self.bigtext_result.grid(row=1, column=1, sticky=E)
 
-        #big box for output parser
+        # big box for output parser
         self.bigtext_parser = Text(self.master, height=15, width=40)
         self.bigtext_parser.grid(row=1, column=2, sticky=E)
 
@@ -93,155 +94,332 @@ class MyGUI:
         for x in one_string:
             result_key = re.match(r'^(\s+)?(if?n?t?)?(else)?(float)?(print)?(\s+)?', one_string)
             result_key = result_key.group()
-            # print(result_key)
+            string = ""
+            for x in result_key:
+                if x != ' ':
+                    string += x
+            result_key = string
             print_presnt = False
             for x in result_key:
                 if x == 'p':
                     print_presnt = True
             if result_key[0] == 'p' or print_presnt:
-                # print("made print")
                 result_id = result_key
+                string = ""
+                for x in result_id:
+                    if x != ' ':
+                        string += x
+                result_id = string
                 one_string = re.sub(r'^(\s+)?(if?n?t?)?(else)?(float)?(print)?(\s+)?', '', one_string)
                 result_sp = re.match(r'^[():;"](\s+)?', one_string)
                 result_sp = result_sp.group()
+                string = ""
+                for x in result_sp:
+                    if x != ' ':
+                        string += x
+                result_sp = string
                 one_string = re.sub(r'^[():;"](\s+)?', '', one_string)
                 result_sp_two = re.match(r'^[():;"](\s+)?', one_string)
                 result_sp_two = result_sp_two.group()
+                string = ""
+                for x in result_sp_two:
+                    if x != ' ':
+                        string += x
+                result_sp_two = string
                 one_string = re.sub(r'^[():;"](\s+)?', '', one_string)
                 result_string = re.match(r'^((\w+)(\s+)?)*', one_string)
                 result_string = result_string.group()
+                string = ""
+                # for x in result_string:
+                #    if x != ' ':
+                #        string += x
+                # result_string = string
                 one_string = re.sub(r'^((\w+)(\s+)?)*', '', one_string)
                 result_sp_three = re.match(r'^[():;"](\s+)?', one_string)
                 result_sp_three = result_sp_three.group()
+                string = ""
+                for x in result_sp_three:
+                    if x != ' ':
+                        string += x
+                result_sp_three = string
                 one_string = re.sub(r'^[():;"](\s+)?', '', one_string)
                 result_sp_four = re.match(r'^[():;"](\s+)?', one_string)
                 result_sp_four = result_sp_four.group()
+                string = ""
+                for x in result_sp_four:
+                    if x != ' ':
+                        string += x
+                result_sp_four = string
                 one_string = re.sub(r'^[():;"](\s+)?', '', one_string)
-                list_.append("<identifier,%s>" % result_id)
-                list_.append("<separator,%s>" % result_sp)
-                list_.append("<separator,%s>" % result_sp_two)
+
+                result_sp_five = re.match(r'^[():;"](\s+)?', one_string)
+                if result_sp_five is not None:
+                    result_sp_five = result_sp_five.group()
+                    string = ""
+                    for x in result_sp_five:
+                        if x != ' ':
+                            string += x
+                    result_sp_five = string
+                    one_string = re.sub(r'^[():;"](\s+)?', '', one_string)
+
+                list_.append("<id,%s>" % result_id)
+                list_.append("<sp,%s>" % result_sp)
+                list_.append("<sp,%s>" % result_sp_two)
                 list_.append("<lit_str,%s>" % result_string)
-                list_.append("<separator,%s>" % result_sp_three)
-                list_.append("<separator,%s>" % result_sp_four)
+                list_.append("<sp,%s>" % result_sp_three)
+                list_.append("<sp,%s>" % result_sp_four)
+                if result_sp_five is not None:
+                    list_.append("<sp,%s>" % result_sp_five)
                 return list_
             elif result_key[0] == 'i' and result_key[1] == 'n' and result_key[2] == 't':
-                # print("made int")
                 one_string = re.sub(r'^(if?n?t?)?(else)?(float)?(\s+)?', '', one_string)
                 result_id = re.match(r'^([a-zA-Z]+(\d+)?)(\s+)?', one_string)
                 result_id = result_id.group()
+                string = ""
+                for x in result_id:
+                    if x != ' ':
+                        string += x
+                result_id = string
                 one_string = re.sub(r'^([a-zA-Z]+(\d+)?)(\s+)?', '', one_string)
                 result_op = re.match(r'^[=+>*](\s+)?', one_string)
                 result_op = result_op.group()
+                string = ""
+                for x in result_op:
+                    if x != " ":
+                        string += x
+                result_op = string
                 one_string = re.sub(r'^[=+>*](\s+)?', '', one_string)
-                result_int = re.match(r'^\d+$', one_string)
-                #result_int = result_int.group()
+                result_int = re.match(r'^\d+', one_string)
                 if result_int is not None:
                     result_int = result_int.group()
-                    one_string = re.sub(r'^\d+$', '', one_string)
+                    one_string = re.sub(r'^\d+', '', one_string)
+                    result_sp = re.match(r'^[():;"](\s+)?', one_string)
+                    if result_sp is not None:
+                        result_sp = result_sp.group()
+                        string = ""
+                        for x in result_sp:
+                            if x != ' ':
+                                string += x
+                        result_sp = string
+                        one_string = re.sub(r'^[():;"](\s+)?', '', one_string)
                     list_.append("<keyword,%s>" % result_key)
-                    list_.append("<identifier,%s>" % result_id)
-                    list_.append("<operator,%s>" % result_op)
+                    list_.append("<id,%s>" % result_id)
+                    list_.append("<op,%s>" % result_op)
                     list_.append("<lit_int,%s>" % result_int)
+                    if result_sp is not None:
+                        list_.append("<sp,%s>" % result_sp)
                     return list_
                 else:
                     list_.append("<keyword,%s>" % result_key)
                     for i in one_string:
-                        list_.append("<identifier,%s>" % result_id)
-                        list_.append("<operator,%s>" % result_op)
+                        list_.append("<id,%s>" % result_id)
+                        list_.append("<op,%s>" % result_op)
                         result_id = re.match(r'^([a-zA-Z]+(\d+)?)(\s+)?', one_string)
                         result_id = result_id.group()
+                        string = ""
+                        for x in result_id:
+                            if x != ' ':
+                                string += x
+                        result_id = string
                         one_string = re.sub(r'^([a-zA-Z]+(\d+)?)(\s+)?', '', one_string)
                         if one_string is not None:  # is not None
                             result_op = re.match(r'^[=+>*](\s+)?', one_string)
                             if result_op != None:
                                 result_op = result_op.group()
+                                string = ""
+                                for x in result_op:
+                                    if x != ' ':
+                                        string += x
+                                result_op = string
                                 one_string = re.sub(r'^[=+>*](\s+)?', '', one_string)
                             else:
-                                list_.append("<identifier,%s>" % result_id)
-                                # print(list_, "finsh")
+                                list_.append("<id,%s>" % result_id)
+                                result_sp = re.match(r'^[():;"](\s+)?', one_string)
+                                if result_sp is not None:
+                                    result_sp = result_sp.group()
+                                    string = ""
+                                    for x in result_sp:
+                                        if x != ' ':
+                                            string += x
+                                    result_sp = string
+                                if result_sp is not None:
+                                    list_.append("<sp,%s>" % result_sp)
                                 return list_
             elif result_key[0] == 'f' and result_key[1] == 'l' and result_key[2] == 'o':
-                # print("made float")
                 one_string = re.sub(r'^(if?n?t?)?(else)?(float)?(\s+)?', '', one_string)
                 result_id = re.match(r'^([a-zA-Z]+(\d+)?)(\s+)?', one_string)
                 result_id = result_id.group()
+                string = ""
+                for x in result_id:
+                    if x != ' ':
+                        string += x
+                result_id = string
                 one_string = re.sub(r'^([a-zA-Z]+(\d+)?)(\s+)?', '', one_string)
                 result_op = re.match(r'^[=+>*](\s+)?', one_string)
                 result_op = result_op.group()
+                string = ""
+                for x in result_op:
+                    if x != ' ':
+                        string += x
+                result_op = string
                 one_string = re.sub(r'^[=+>*](\s+)?', '', one_string)
                 result_int = re.match(r'^\d+\.\d+$', one_string)
-                # result_int = result_int.group()
+
                 if result_int is not None:
-                    # print("made float num")
                     result_int = result_int.group()
+                    string = ""
+                    for x in result_int:
+                        if x != ' ':
+                            string += x
+                    result_int = string
                     one_string = re.sub(r'^\d+\.\d+$', '', one_string)
                     list_.append("<keyword,%s>" % result_key)
-                    list_.append("<identifier,%s>" % result_id)
-                    list_.append("<operator,%s>" % result_op)
+                    list_.append("<id,%s>" % result_id)
+                    list_.append("<op,%s>" % result_op)
                     list_.append("<lit_float,%s>" % result_int)
                     return list_
                 else:
                     list_.append("<keyword,%s>" % result_key)
-                    for i in one_string:
-                        # print("made float strings", one_string)
-                        list_.append("<identifier,%s>" % result_id)
-                        list_.append("<operator,%s>" % result_op)
-                        # print(list_)
-                        result_id = re.match(r'^([a-zA-Z]+(\d+)?)(\s+)?', one_string)
+                    list_.append("<id,%s>" % result_id)
+                    result_num = re.match(r'^(\d+\.\d+)?(\d+)?(\s+)?', one_string)  # checking if a num is next
+                    result_id = re.match(r'^([a-zA-Z]+(\d+)?)(\s+)?', one_string)  # checking wether next is string
+                    if result_num is not None:
+                        result_num = result_num.group()
+                    if result_id is not None:
                         result_id = result_id.group()
-                        one_string = re.sub(r'^([a-zA-Z]+(\d+)?)(\s+)?', '', one_string)
-                        if one_string is not None:  # is not None
-                            result_op = re.match(r'^[=+>*](\s+)?', one_string)
-                            if result_op != None:
-                                result_op = result_op.group()
-                                one_string = re.sub(r'^[=+>*](\s+)?', '', one_string)
+                        string = ""
+                        for x in result_id:
+                            if x != ' ':
+                                string += x
+                        result_id = string
+                    if result_num != "":
+                        #print("made float new")
+                        for i in one_string:
+                            list_.append("<op,%s>" % result_op)
+                            result_float = re.match(r'^(\d+\.\d+)(\s+)?', one_string)
+                            if result_float is not None:
+                                result_float = result_float.group()
+                                string = ""
+                                for x in result_float:
+                                    if x != ' ':
+                                        string += x
+                                result_float = string
+                                one_string = re.sub(r'^(\d+\.\d+)(\s+)?', '', one_string)
+                                list_.append("<lit_float,%s>" % result_float)
                             else:
-                                list_.append("<identifier,%s>" % result_id)
-                                # print(list_, "finsh")
-                                return list_
+                                result_int = re.match(r'^(\d+)(\s+)?', one_string)
+                                if result_int is not None:
+                                    result_int = result_int.group()
+                                    string = ""
+                                    for x in result_int:
+                                        if x != ' ':
+                                            string += x
+                                    result_int = string
+                                    one_string = re.sub(r'^(\d+)(\s+)?', '', one_string)
+                                    list_.append("<lit_int,%s>" % result_int)
+                            if i is not None:
+                                result_op = re.match(r'^[=+>*](\s+)?', one_string)
+                                if result_op is not None:
+                                    result_op = result_op.group()
+                                    string = ""
+                                    for x in result_op:
+                                        if x != ' ':
+                                            string += x
+                                    result_op = string
+                                    one_string = re.sub(r'^[=+>*](\s+)?', '', one_string)
+                                else:
+                                    result_sp = re.match(r'^[():;"]$', one_string)
+                                    if result_sp is not None:
+                                        result_sp = result_sp.group()
+                                        one_string = re.sub(r'^[():;"]$', '', one_string)
+                                        list_.append("<sp,%s>" % result_sp)
+                                        return list_
+                        # return list_
+                    elif result_id != "":
+                        for i in one_string:
+                            list_.append("<op,%s>" % result_op)
+                            list_.append("<id,%s>" % result_id)
+                            result_id = re.match(r'^([a-zA-Z]+(\d+)?)(\s+)?', one_string)
+                            result_id = result_id.group()
+                            string = ""
+                            for x in result_id:
+                                if x != ' ':
+                                    string += x
+                            result_id = string
+                            one_string = re.sub(r'^([a-zA-Z]+(\d+)?)(\s+)?', '', one_string)
+                            if one_string is not None:
+                                result_op = re.match(r'^[=+>*](\s+)?', one_string)
+                                if result_op != None:
+                                    result_op = result_op.group()
+                                    string = ""
+                                    for x in result_op:
+                                        if x != ' ':
+                                            string += x
+                                    result_op = string
+                                    one_string = re.sub(r'^[=+>*](\s+)?', '', one_string)
+                                else:
+                                    list_.append("<id,%s>" % result_id)
+                                    return list_
+
             elif result_key[0] == 'i' and result_key[1] == 'f':
-                # print("made if")
                 one_string = re.sub(r'^(if?n?t?)?(else)?(float)?(\s+)?', '', one_string)
-                # print(one_string)
                 result_sp = re.match(r'^[():;"]', one_string)
                 result_sp = result_sp.group()
                 one_string = re.sub(r'^[():;"]', '', one_string)
-                # print(one_string)
-                result_id = re.match(r'^(([a-zA-Z]+(\d+)?)(\s+)?)', one_string)
-                result_id = result_id.group()
-                one_string = re.sub(r'^(([a-zA-Z]+(\d+)?)(\s+)?)', '', one_string)
+                string = ""
+                for x in result_key:
+                    if x != ' ':
+                        string += x
+                list_.append("<keyword,%s>" % string)
+                list_.append("<sp,%s>" % result_sp)
+                for i in one_string:
+                    result_id = re.match(r'^(([a-zA-Z]+(\d+)?)(\s+)?)', one_string)
+                    if result_id is not None:
+                        result_id = result_id.group()
+                        string = ""
+                        for x in result_id:
+                            if x != " ":
+                                string += x
+                        one_string = re.sub(r'^(([a-zA-Z]+(\d+)?)(\s+)?)', '', one_string)
+                        list_.append("<lit_str,%s>" % string)
+                    result_op = re.match(r'^[=+>*](\s+)?', one_string)
+                    if result_op is not None:
+                        result_op = result_op.group()
+                        string = ""
+                        for x in result_op:
+                            if x != " ":
+                                string += x
+                        one_string = re.sub(r'^[=+>*](\s+)?', '', one_string)
+                        list_.append("<op,%s>" % string)
 
-                result_op = re.match(r'^[=+>*](\s+)?', one_string)
-                result_op = result_op.group()
-                one_string = re.sub(r'^[=+>*](\s+)?', '', one_string)
+                    result_int = re.match(r'^\d+', one_string)
+                    if result_int is not None:
+                        result_int = result_int.group()
+                        string = ""
+                        for x in string:
+                            if x != ' ':
+                                string += x
+                        one_string = re.sub(r'^\d+', '', one_string)
+                        list_.append("<lit_int,%s>" % string)
 
-                result_int = re.match(r'^\d+', one_string)
-                result_int = result_int.group()
-                one_string = re.sub(r'^\d+', '', one_string)
-
-                result_sp_end_one = re.match(r'^[():;]', one_string)
-                result_sp_end_one = result_sp_end_one.group()
-                one_string = re.sub(r'^[():;]', '', one_string)
-
-                result_sp_end_two = re.match(r'^[():;"]$', one_string)
-                result_sp_end_two = result_sp_end_two.group()
-                one_string = re.sub(r'^[():;"]$', '', one_string)
-
-                list_.append("<keyword,%s>" % result_key)
-                list_.append("<separator,%s>" % result_sp)
-                list_.append("<identifier,%s>" % result_id)
-                list_.append("<operator,%s>" % result_op)
-                list_.append("<lit_int,%s>" % result_int)
-                list_.append("<operator,%s>" % result_sp_end_one)
-                list_.append("<operator,%s>" % result_sp_end_two)
+                    result_sp = re.match(r'^[():;"]', one_string)
+                    if result_sp is not None:
+                        result_sp = result_sp.group()
+                        one_string = re.sub(r'^[():;"]', '', one_string)
+                        list_.append("<sp,%s>" % result_sp)
+                        result_sp = re.match(r'^[():;"]$', one_string)
+                        result_sp = result_sp.group()
+                        one_string = re.sub(r'^[():;"]$', '', one_string)
+                        list_.append("<sp,%s>" % result_sp)
                 return list_
+
             elif result_key[0] == 'e' and result_key[1] == 'l' and result_key[2] == 's' and result_key[3] == 'e':
                 one_string = re.sub(r'^(if?n?t?)?(else)?(float)?(\s+)?', '', one_string)
                 result_sp = re.match(r'^[():;"]$', one_string)
                 result_sp = result_sp.group()
                 string = re.sub(r'^[():;"]$', '', one_string)
                 list_.append("<keyword,%s>" % result_key)
-                list_.append("<separator,%s>" % result_sp)
+                list_.append("<sp,%s>" % result_sp)
                 return list_
 
 
@@ -249,7 +427,5 @@ if __name__ == '__main__':
     myTkRoot = Tk()
     my_gui = MyGUI(myTkRoot)
     myTkRoot.mainloop()
-
-#gaby's comment test
 
 
