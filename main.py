@@ -7,7 +7,7 @@ class MyGUI:
     def __init__(self, root):
         self.master = root
         self.master.title("Lexical Analyzer TinyPie")       #title label
-        self.master.geometry("975x350")
+        self.master.geometry("1100x350")
 
         #two labels for the two boxes
         self.label_input = Label(self.master, text="Source Code Input:\t\t\t")
@@ -27,7 +27,7 @@ class MyGUI:
         self.bigtext_result.grid(row=1, column=1, sticky=E)
 
         # big box for output parser
-        self.bigtext_parser = Text(self.master, height=15, width=40)
+        self.bigtext_parser = Text(self.master, height=15, width=50)
         self.bigtext_parser.grid(row=1, column=2, sticky=E)
 
         #label for current processing lines
@@ -47,6 +47,10 @@ class MyGUI:
         self.num_counter = 0
         self.list_tokens = []
 
+        self.old_list = []
+        self.Mytokens = []
+        self.inToken #= ("empty", "empty")
+        self.num = 0
 
     #text is copy/pasted and shown in the output box. Current processing line add 1 and shows 1
     def submitt_nextline(self):   #adding 1 to every new line
@@ -69,9 +73,41 @@ class MyGUI:
         if len(self.list_line) != 0:
             #*********Going to insert/combine lexer here***************
             #want to use function CutOneLineTokens to return the string into a list of tokens to display by index
+            print("current list_before", self.list_tokens)
             self.list_tokens = self.CutOneLineTokens(self.list_line[0])      #ask about the string parameter
+            print("current list", self.list_tokens)
             for x in self.list_tokens:
                 self.bigtext_result.insert(END, x + '\n')
+            #########################
+
+
+            #list_line   [one_string, two_string etc
+            ###connect to parser
+            self.old_list = self.list_tokens
+
+            for x in self.list_tokens:
+                str_x = x
+                strip = str_x.strip("<>")
+                split_list = strip.split(",")
+                if split_list[1] == '':
+                    split_list[1] = '>'
+                inToken_save = (split_list[0], split_list[1])
+                self.Mytokens.append(inToken_save)
+                #print("OOOOOOO", self.Mytokens)
+
+
+            #self.inToken = ("empty", "empty")
+            #self.Mytokens = self.list_tokens
+            empty_one = ""
+            empyt_two = ""
+            self.num += 1
+            self.bigtext_parser.insert(END, "####Parse tree for line %d###" % self.num,'\n')
+            self.parser()
+            self.bigtext_parser.insert(END, '\n')
+
+
+            self.Mytokens.clear()
+            ######################
             self.list_tokens.clear()
             self.bigtext_result.insert(END, '\n')
             self.current_num_counter.delete(0, END)
@@ -81,6 +117,7 @@ class MyGUI:
             #print(self.list_line)
             if len(self.list_line) == 0:
                 self.list_gone = True
+
 
 
     def submitt_quit(self):         #simply ending the program
@@ -422,6 +459,180 @@ class MyGUI:
                 list_.append("<sp,%s>" % result_sp)
                 return list_
 
+# Mytokens=[("id","myvar"),("op","="),("int","5"),("op","+"),("int","6"),("op","+"),("float","2.3"),("sep",";")]
+    inToken = ("empty", "empty")
+
+# myvar=2*3*4*2.3;
+# Mytokens = [("id","myvar"),("op","="),("int","2"),("op","*"),("int","3"),("op","*"),("int","4"),("op","*"), ("float","2.3"), ("sep",";")]
+
+# float myVar =5*4.3+2.1;    or     float mynum= 3.4+7*2.1;
+# Mytokens=[("id","myvar"),("op","="),("int","5"),("op","*"),("float","4.3"),("op","+"),("float","2.1"),("sep",";")]
+# Mytokens=[("id","mynum"),("op","="),("float","3.4"),("op","+"),("int","7"),("op","*"),("float","2.1"),("sep",";")]
+
+# myvar=2*3.3+4*5.5
+#Mytokens=[("id","myvar"),("op","="),("int","2"),("op","*"),("float","3.3"),("op","+"),("int","4"),("op","*"),("float","5.5"),("sep",";")]
+
+# myvar=2.4+5*6.1+3.5
+    #Mytokens = [("keyword", "float"), ("id", "myvar"), ("op", "="), ("float", "2.4"), ("op", "+"), ("int", "5"), ("op", "*"), ("float", "6.1"), ("op", "+"), ("float", "3.5"), ("sep", ";")]
+
+
+    def accept_token(self):
+        global inToken
+        print("     accept token from the list:" + inToken[1])
+        string = "     accept token from the list:" + inToken[1]
+        self.bigtext_parser.insert(END, string + '\n')
+        inToken = self.Mytokens.pop(0)
+
+
+    def math(self):
+        print("\n----parent node math, finding children nodes:")
+        string = "\n----parent node math, finding children nodes:"
+        self.bigtext_parser.insert(END, string + '\n')
+        global inToken
+        if (inToken[0] == "lit_float"):
+            print("child node (internal): float")
+            string = "child node (internal): float"
+            self.bigtext_parser.insert(END, string + '\n')
+            print("   float has child node (token):" + inToken[1])
+            string = "   float has child node (token):" + inToken[1]
+            self.bigtext_parser.insert(END, string + '\n')
+            self.accept_token()
+
+            if (inToken[1] == "+"):
+                print("child node (token):" + inToken[1])
+                string = "child node (token):" + inToken[1]
+                self.bigtext_parser.insert(END, string + '\n')
+                self.accept_token()
+
+                print("child node (internal): math")
+                string = "child node (internal): math"
+                self.bigtext_parser.insert(END, string + '\n')
+                self.math()
+            elif (inToken[1] == "*"):
+                print("child node (token):" + inToken[1])
+                string = "child node (token):" + inToken[1]
+                self.bigtext_parser.insert(END, string + '\n')
+                self.accept_token()
+
+                print("child node (internal): math")
+                string = "child node (internal): math"
+                self.bigtext_parser.insert(END, string + '\n')
+                self.math()
+            else:
+                print("error, you need + after the int in the math")
+                string = "error, you need + after the int in the math"
+                self.bigtext_parser.insert(END, string + '\n')
+
+        elif (inToken[0] == "lit_int"):
+            print("child node (internal): int")
+            string = "child node (internal): int"
+            self.bigtext_parser.insert(END, string + '\n')
+            print("   int has child node (token):" + inToken[1])
+            string ="    int has child node (token):" + inToken[1]
+            self.bigtext_parser.insert(END, string + '\n')
+            self.accept_token()
+
+            if (inToken[1] == "+"):
+                print("child node (token):" + inToken[1])
+                string = "child node (token):" + inToken[1]
+                self.bigtext_parser.insert(END, string + '\n')
+                self.accept_token()
+
+                print("child node (internal): math")
+                string = "child node (internal): math"
+                self.bigtext_parser.insert(END, string + '\n')
+                self.math()
+            elif (inToken[1] == "*"):
+                print("child node (token):" + inToken[1])
+                string = "child node (token):" + inToken[1]
+                self.bigtext_parser.insert(END, string + '\n')
+                self.accept_token()
+
+                print("child node (internal): math")
+                string = "child node (internal): math"
+                self.bigtext_parser.insert(END, string + '\n')
+                self.math()
+            else:
+                print("error, you need + after the int in the math")
+                string = "error, you need + after the int in the math"
+                self.bigtext_parser.insert(END, string + '\n')
+
+        else:
+            print("error, math expects float or int")
+            string = "error, math expects float or int"
+            self.bigtext_parser.insert(END, string + '\n')
+
+    def exp(self):
+        #print("\n---keyword node:")  #must be after paerant
+        #global inToken;
+        #typeK, token = inToken;
+        #if (typeK == "keyword"):
+        #    print("keyword node (root): keyword")
+        #    print("   keyword has root node (token):" + token)
+        #    accept_token()
+        print("\n----parent node exp, finding children nodes:")
+        string = "\n----parent node exp, finding children nodes:"
+        self.bigtext_parser.insert(END, string + '\n')
+        global inToken;
+        typeK, token = inToken;
+        if (typeK == "keyword"):
+            print("keyword node (root): keyword")
+            string = "keyword node (root): keyword"
+            self.bigtext_parser.insert(END, string + '\n')
+            print("   keyword has root node (token):" + token)
+            string = "   keyword has root node (token):" + token
+            self.bigtext_parser.insert(END, string + '\n')
+            self.accept_token()
+        else:
+            print("expexted keyword as the first element of the expression!\n")
+            string = "expexted keyword as the first element of the expression!\n"
+            self.bigtext_parser.insert(END, string + '\n')
+            return
+        #global inToken;
+        typeT, token = inToken;
+        if (typeT == "id"):
+            print("child node (internal): identifier")
+            string = "child node (internal): identifier"
+            self.bigtext_parser.insert(END, string + '\n')
+            print("   identifier has child node (token):" + token)
+            string = "   identifier has child node (token):" + token
+            self.bigtext_parser.insert(END, string + '\n')
+            self.accept_token()
+        else:
+            print("expect identifier as the second element of the expression!\n")
+            string = "expect identifier as the second element of the expression!\n"
+            self.bigtext_parser.insert(END, string + '\n')
+            return
+
+        if (inToken[1] == "="):
+            print("child node (token):" + inToken[1])
+            string = "child node (token):" + inToken[1]
+            self.bigtext_parser.insert(END, string + '\n')
+            self.accept_token()
+        else:
+            print("expect = as the second element of the expression!")
+            string = "expect = as the second element of the expression!"
+            self.bigtext_parser.insert(END, string + '\n')
+            return
+
+        print("Child node (internal): math")
+        string = "Child node (internal): math"
+        self.bigtext_parser.insert(END, string + '\n')
+        self.math()
+
+
+    def parser(self):
+        global inToken
+        inToken = self.Mytokens.pop(0)
+        self.exp()
+        if (inToken[1] == ";"):
+            print("\nparse tree building success!")
+            string = "\nparse tree building success!"
+            self.bigtext_parser.insert(END, string + '\n')
+        return
+
+
+    #parser()
 
 if __name__ == '__main__':
     myTkRoot = Tk()
